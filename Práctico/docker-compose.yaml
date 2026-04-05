@@ -1,0 +1,57 @@
+services:
+
+  warehouse:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=mobile_plans
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  warehouse_ui:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=root
+      - PGADMIN_DEFAULT_PASSWORD=root
+    volumes:
+      - db-ui-data:/var/lib/pgadmin
+    ports:
+      - "8080:80"
+
+  scheduler:
+    image: mageai/mageai
+    volumes:
+      - scheduler-data:/home/src
+    ports:
+      - "6789:6789"
+    command: /app/run_app.sh mage start scheduler
+
+  pyspark-notebook:
+    image: jupyter/pyspark-notebook:latest
+    container_name: pyspark-notebook
+    ports:
+      - "8888:8888"
+      - "4040:4040"
+    volumes:
+      - notebooks:/home/jovyan
+    user: root
+    command: >
+      bash -c "
+      pip install snowflake-connector-python snowflake-sqlalchemy requests 'pyarrow>=14.0.1' tqdm &&
+      start-notebook.sh --NotebookApp.token='' --NotebookApp.password=''
+      "
+    env_file:
+      - .env
+    environment:
+      - SPARK_LOCAL_IP=0.0.0.0
+      - PYSPARK_PYTHON=python3
+
+  volumes:
+    scheduler-data:
+    db-ui-data:
+    db-data:
+    notebooks:
+
