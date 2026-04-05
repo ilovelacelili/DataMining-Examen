@@ -277,6 +277,8 @@
 
 > **Respuesta correcta:** B
 
+---
+
 ### Parte Práctica
 
 #### Contexto Del Problema
